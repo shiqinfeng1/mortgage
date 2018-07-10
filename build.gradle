@@ -1,0 +1,30 @@
+plugins {
+    id 'com.github.blindpirate.gogradle' version '0.10' //注意版本号保证最新
+}
+
+golang {
+    packagePath = 'github.com/shiqinfeng1/mortgage' //github上的项目路径
+}
+//构建
+build {
+   resolveBuildDependencies.enabled = false  //构建时不再进行依赖检查
+   installDependencies.enabled = false   //构建时不再进行依赖检查
+    // 交叉编译的输出选项，注意，要求go 1.5+
+    targetPlatform = ['darwin-amd64', 'linux-amd64', 'linux-386'] //'windows-amd64',
+    
+    // 输出文件的路径，可以是绝对路径（相对于项目目录）或者相对路径
+    // 其中的${}占位符会在交叉编译时被渲染
+    outputLocation = './.gogradle/${GOOS}_${GOARCH}_${PROJECT_NAME}${GOEXE}'
+}
+
+
+dependencies {
+    golang {
+        build(['name':'github.com/bitly/go-simplejson'])
+        build(['name':'github.com/ethereum/go-ethereum'])
+        build(['name':'github.com/go-sql-driver/mysql'])
+        build(['name':'github.com/hanguofeng/config'])
+        build(['name':'github.com/labstack/echo'])
+        build(['name':'github.com/nicksnyder/go-i18n'])
+    }
+}
