@@ -15,7 +15,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-//SessionManager 会话管理
 type SessionManager struct {
 	Lock    sync.Mutex
 	Smap    map[string]*list.Element
