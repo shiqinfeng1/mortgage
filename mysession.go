@@ -8,19 +8,18 @@ import (
 	"fmt"
 	"io"
 	_ "log"
-	//"net/http"
-	//"net/url"
 	_ "reflect"
 	"sync"
 	"time"
+
 	"github.com/labstack/echo"
 )
 
 type SessionManager struct {
-	Lock       sync.Mutex
-	Smap       map[string]*list.Element
-	SL         *list.List //gc
-	Expires    int
+	Lock    sync.Mutex
+	Smap    map[string]*list.Element
+	SL      *list.List //gc
+	Expires int
 }
 type Session struct {
 	Key     string
@@ -42,7 +41,7 @@ func (sm *SessionManager) get(sid string) (Session, error) {
 }
 
 func (sm *SessionManager) NewSession(key string, sid string, value interface{}) *Session {
-	fmt.Printf("\nNewSession. token='%s' key='%s' time:'%v'\n", sid,key,time.Now())
+	fmt.Printf("\nNewSession. token='%s' key='%s' time:'%v'\n", sid, key, time.Now())
 	return &Session{
 		Key:     key,
 		Sid:     sid,
@@ -51,18 +50,18 @@ func (sm *SessionManager) NewSession(key string, sid string, value interface{}) 
 	}
 }
 
-func (sm *SessionManager) SessionStart(c echo.Context,token string) (session Session,err error) {
+func (sm *SessionManager) SessionStart(c echo.Context, token string) (session Session, err error) {
 	sm.Lock.Lock()
 	defer sm.Lock.Unlock()
 	if token == "" {
 		sid := sm.sessionId()
 		session = *sm.NewSession("", sid, "")
-		fmt.Printf("\n[SessionStart]NewSession. NEW sessionID: '%s' Expires= %d\n", sid,session.Expires)
+		fmt.Printf("\n[SessionStart]NewSession. NEW sessionID: '%s' Expires= %d\n", sid, session.Expires)
 	} else {
 		session, err = sm.get(token)
 		//fmt.Printf("\n[SessionStart]GET Old Session. sessionID= '%s' Expires= %d\n", token,session.Expires)
 	}
-	return 
+	return
 }
 
 //垃圾回收
@@ -73,12 +72,12 @@ func (sm *SessionManager) Listen() {
 	for e := sm.SL.Front(); e != nil; e = n {
 		n = e.Next()
 		if e.Value.(*Session).Expires == 0 {
-			fmt.Printf("\nSession timeout. token=%s time:%v\n", e.Value.(*Session).Sid,time.Now())
+			fmt.Printf("\nSession timeout. token=%s time:%v\n", e.Value.(*Session).Sid, time.Now())
 			delete(sm.Smap, e.Value.(*Session).Sid)
 			sm.SL.Remove(e)
 		} else {
 			e.Value.(*Session).Expires--
-			fmt.Printf("\nSession ageing. token=%s Expires:%v\n", e.Value.(*Session).Sid,e.Value.(*Session).Expires)
+			fmt.Printf("\nSession ageing. token=%s Expires:%v\n", e.Value.(*Session).Sid, e.Value.(*Session).Expires)
 		}
 	}
 

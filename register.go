@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	_ "errors"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
 	_ "log"
 	_ "os"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 type SqlType struct {
@@ -38,16 +39,16 @@ func ConnectDB(dbname string) (db *sql.DB, err error) {
 	}
 	for _, sql := range sqls {
 		if _, err := db.Exec(sql); err != nil {
-			
+
 			if w, ok := err.(mysql.MySQLWarnings); ok {
 				fmt.Printf("WARING on %q: %v\n", sql, w)
 			} else {
 				//fmt.Printf("ERROR on %q: %v\n", sql, err)
 			}
-			
+
 		}
 	}
-	return 
+	return
 }
 
 //check unique
@@ -61,7 +62,7 @@ func CheckUnique(db *sql.DB, userName string) (bl bool, err error) {
 	}
 
 	if false != rows.Next() {
-		fmt.Printf("user %v alrealdy exists",userName)
+		fmt.Printf("user %v alrealdy exists", userName)
 		return false, nil
 	}
 	return true, nil
@@ -145,7 +146,7 @@ func UpdateVerify(db *sql.DB, userName string, verify_ok int) (err error) {
 			return err
 		}
 	}
-	fmt.Printf("%s update verify_ok:%d\n", userName,verify_ok)
+	fmt.Printf("%s update verify_ok:%d\n", userName, verify_ok)
 	return nil
 }
 func UpdateBankCard(db *sql.DB, userName string, bankcard string, realname string) (err error) {
@@ -158,7 +159,7 @@ func UpdateBankCard(db *sql.DB, userName string, bankcard string, realname strin
 			return err
 		}
 	}
-	fmt.Printf("%s update bankcard:%s\n", userName,bankcard)
+	fmt.Printf("%s update bankcard:%s\n", userName, bankcard)
 	return nil
 }
 
@@ -172,12 +173,12 @@ func DelBankCard(db *sql.DB, userName string, bankcard string) (err error) {
 			return err
 		}
 	}
-	fmt.Printf("%s delete bankcard:%s\n", userName,bankcard)
+	fmt.Printf("%s delete bankcard:%s\n", userName, bankcard)
 	return nil
 }
 func UpdateImages(db *sql.DB, userName string, index string, filename string) (err error) {
-	fileindex := "file"+index
-	stmt, err := db.Prepare("update user set "+fileindex+"=? where user_name=?")
+	fileindex := "file" + index
+	stmt, err := db.Prepare("update user set " + fileindex + "=? where user_name=?")
 	defer stmt.Close()
 	checkErr(err)
 	if _, err := stmt.Exec(filename, userName); err != nil {
@@ -185,18 +186,18 @@ func UpdateImages(db *sql.DB, userName string, index string, filename string) (e
 			return err
 		}
 	}
-	fmt.Printf("%s update image:%s fileidx:%s\n", userName,filename,fileindex)
+	fmt.Printf("%s update image:%s fileidx:%s\n", userName, filename, fileindex)
 	return nil
 }
 
-func InsertPassword(db *sql.DB, userName string, userPasswd string,timestamp string) (err error) {
+func InsertPassword(db *sql.DB, userName string, userPasswd string, timestamp string) (err error) {
 
 	stmt, err := db.Prepare(`INSERT user (user_name,user_passwd,timestamp) values (?,?,?)`)
 	defer stmt.Close()
 	if !checkErr(err) {
 		return
 	}
-	res, err := stmt.Exec(userName, userPasswd,timestamp)
+	res, err := stmt.Exec(userName, userPasswd, timestamp)
 	if !checkErr(err) {
 		return
 	}
@@ -212,7 +213,7 @@ func InsertUserAsset(db *sql.DB, asset *Asset) (err error) {
 	if !checkErr(err) {
 		return
 	}
-	res, err := stmt.Exec(asset.Account, asset.Phonenum,asset.Accounttype)
+	res, err := stmt.Exec(asset.Account, asset.Phonenum, asset.Accounttype)
 	if !checkErr(err) {
 		return
 	}
@@ -230,7 +231,7 @@ func DelAssetAccount(db *sql.DB, account string) (err error) {
 			return err
 		}
 	}
-	fmt.Printf("delete asset account:%s\n",account)
+	fmt.Printf("delete asset account:%s\n", account)
 	return nil
 }
 func InsertApply(db *sql.DB, apply *ApplyInfo) (err error) {
@@ -240,7 +241,7 @@ func InsertApply(db *sql.DB, apply *ApplyInfo) (err error) {
 	if !checkErr(err) {
 		return
 	}
-	res, err := stmt.Exec(apply.Phonenum,apply.Account,apply.Timestamp,apply.Duration,apply.Moneyamount,apply.Accounttype)
+	res, err := stmt.Exec(apply.Phonenum, apply.Account, apply.Timestamp, apply.Duration, apply.Moneyamount, apply.Accounttype)
 	if !checkErr(err) {
 		return
 	}
@@ -256,7 +257,7 @@ func InsertRecord(db *sql.DB, record *RecordInfo) (err error) {
 	if !checkErr(err) {
 		return
 	}
-	res, err := stmt.Exec(record.Phonenum,record.Account,record.Applyid,record.Timestamp,record.Price,record.Tokenamount,record.Interest)
+	res, err := stmt.Exec(record.Phonenum, record.Account, record.Applyid, record.Timestamp, record.Price, record.Tokenamount, record.Interest)
 	if !checkErr(err) {
 		return
 	}
@@ -264,11 +265,11 @@ func InsertRecord(db *sql.DB, record *RecordInfo) (err error) {
 	fmt.Println(lastid)
 	return nil
 }
-func QueryUserInfoAll(db *sql.DB, currentPage, perPage int) (userinfo []UserInfo, total int, err error){
+func QueryUserInfoAll(db *sql.DB, currentPage, perPage int) (userinfo []UserInfo, total int, err error) {
 	var (
 		id, sum, fromIdx int
-		passwd   string
-		temp UserInfo
+		passwd           string
+		temp             UserInfo
 	)
 
 	rows, err := db.Query("select * from user")
@@ -277,11 +278,11 @@ func QueryUserInfoAll(db *sql.DB, currentPage, perPage int) (userinfo []UserInfo
 	if !checkErr(err) {
 		return []UserInfo{}, sum, err
 	}
-	
+
 	for rows.Next() {
-		err := rows.Scan(&id, &temp.Phonenum, &passwd, 
-			&temp.Bankcard,&temp.Path1,&temp.Path2,&temp.Path3,
-			&temp.Verifyok,&temp.Realname,&temp.Timestamp)
+		err := rows.Scan(&id, &temp.Phonenum, &passwd,
+			&temp.Bankcard, &temp.Path1, &temp.Path2, &temp.Path3,
+			&temp.Verifyok, &temp.Realname, &temp.Timestamp)
 		if !checkErr(err) {
 			return []UserInfo{}, 0, err
 		}
@@ -289,54 +290,54 @@ func QueryUserInfoAll(db *sql.DB, currentPage, perPage int) (userinfo []UserInfo
 	}
 	if currentPage == 0 {
 		total = len(userinfo)
-		return 
+		return
 	}
 	total = len(userinfo)
 	fromIdx = (currentPage - 1) * perPage
-	if len(userinfo) > fromIdx + perPage {
-		userinfo = userinfo[fromIdx:fromIdx+perPage]
+	if len(userinfo) > fromIdx+perPage {
+		userinfo = userinfo[fromIdx : fromIdx+perPage]
 	} else if len(userinfo) > fromIdx {
 		userinfo = userinfo[fromIdx:]
-	}else{
+	} else {
 		userinfo = []UserInfo{}
 	}
-	return 
+	return
 }
-func QueryUserInfo(db *sql.DB, userName string) (userinfo UserInfo,err error){
+func QueryUserInfo(db *sql.DB, userName string) (userinfo UserInfo, err error) {
 	var (
-		id int
-		passwd   string
+		id     int
+		passwd string
 	)
 
-	rows, err := db.Query("select * from user where user_name=?",userName)
+	rows, err := db.Query("select * from user where user_name=?", userName)
 	defer rows.Close()
 
 	if !checkErr(err) {
 		return UserInfo{}, err
 	}
-	
+
 	for rows.Next() {
-		err := rows.Scan(&id, &userinfo.Phonenum, &passwd, 
-			&userinfo.Bankcard,&userinfo.Path1,&userinfo.Path2,&userinfo.Path3,
-			&userinfo.Verifyok,&userinfo.Realname,&userinfo.Timestamp)
+		err := rows.Scan(&id, &userinfo.Phonenum, &passwd,
+			&userinfo.Bankcard, &userinfo.Path1, &userinfo.Path2, &userinfo.Path3,
+			&userinfo.Verifyok, &userinfo.Realname, &userinfo.Timestamp)
 		if !checkErr(err) {
 			return UserInfo{}, err
 		}
 	}
-	return 
+	return
 }
 
-func QueryUserAsset(db *sql.DB, userName string) (asset []Asset,err error){
+func QueryUserAsset(db *sql.DB, userName string) (asset []Asset, err error) {
 
 	var temp Asset
 
-	rows, err := db.Query("select * from asset where user_name=?",userName)
+	rows, err := db.Query("select * from asset where user_name=?", userName)
 	defer rows.Close()
 
 	if !checkErr(err) {
 		return []Asset{}, err
 	}
-	
+
 	for rows.Next() {
 		err := rows.Scan(&temp.Account, &temp.Phonenum, &temp.Accounttype)
 		if !checkErr(err) {
@@ -344,9 +345,9 @@ func QueryUserAsset(db *sql.DB, userName string) (asset []Asset,err error){
 		}
 		asset = append(asset, temp)
 	}
-	return 
+	return
 }
-func QueryUserApplyAll(db *sql.DB, currentPage, perPage int) (applyinfo []ApplyInfo,total int,err error){
+func QueryUserApplyAll(db *sql.DB, currentPage, perPage int) (applyinfo []ApplyInfo, total int, err error) {
 	var (
 		temp ApplyInfo
 	)
@@ -354,34 +355,34 @@ func QueryUserApplyAll(db *sql.DB, currentPage, perPage int) (applyinfo []ApplyI
 	defer rows.Close()
 
 	if !checkErr(err) {
-		return []ApplyInfo{}, 0,err
+		return []ApplyInfo{}, 0, err
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&temp.Applyid,&temp.Phonenum, &temp.Account, &temp.Status,
-			&temp.Timestamp,&temp.Duration,&temp.Moneyamount,&temp.Accounttype,
-			&temp.Totalamount,&temp.Totalinterest)
+		err := rows.Scan(&temp.Applyid, &temp.Phonenum, &temp.Account, &temp.Status,
+			&temp.Timestamp, &temp.Duration, &temp.Moneyamount, &temp.Accounttype,
+			&temp.Totalamount, &temp.Totalinterest)
 		if !checkErr(err) {
-			return []ApplyInfo{}, 0,err
+			return []ApplyInfo{}, 0, err
 		}
 		applyinfo = append(applyinfo, temp)
 	}
 	if currentPage == 0 {
 		total = len(applyinfo)
-		return 
+		return
 	}
 	total = len(applyinfo)
 	fromIdx := (currentPage - 1) * perPage
-	if len(applyinfo) > fromIdx + perPage {
-		applyinfo = applyinfo[fromIdx:fromIdx+perPage]
+	if len(applyinfo) > fromIdx+perPage {
+		applyinfo = applyinfo[fromIdx : fromIdx+perPage]
 	} else if len(applyinfo) > fromIdx {
 		applyinfo = applyinfo[fromIdx:]
-	}else{
+	} else {
 		applyinfo = []ApplyInfo{}
 	}
-	return 
+	return
 }
-func QueryUserApply(db *sql.DB, username string) (applyinfo []ApplyInfo,err error){
+func QueryUserApply(db *sql.DB, username string) (applyinfo []ApplyInfo, err error) {
 	var (
 		temp ApplyInfo
 	)
@@ -393,9 +394,9 @@ func QueryUserApply(db *sql.DB, username string) (applyinfo []ApplyInfo,err erro
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&temp.Applyid,&temp.Phonenum, &temp.Account, &temp.Status,
-			&temp.Timestamp,&temp.Duration,&temp.Moneyamount,&temp.Accounttype,
-			&temp.Totalamount,&temp.Totalinterest)
+		err := rows.Scan(&temp.Applyid, &temp.Phonenum, &temp.Account, &temp.Status,
+			&temp.Timestamp, &temp.Duration, &temp.Moneyamount, &temp.Accounttype,
+			&temp.Totalamount, &temp.Totalinterest)
 		if !checkErr(err) {
 			return []ApplyInfo{}, err
 		}
@@ -403,14 +404,14 @@ func QueryUserApply(db *sql.DB, username string) (applyinfo []ApplyInfo,err erro
 		temp.Bankcard = userinfo.Bankcard
 		applyinfo = append(applyinfo, temp)
 	}
-	return 
+	return
 }
 
-func QueryUserApplyById(db *sql.DB, id int) (applyinfo ApplyInfo,err error){
+func QueryUserApplyById(db *sql.DB, id int) (applyinfo ApplyInfo, err error) {
 	var (
 		id_local int
 	)
-	rows, err := db.Query("select * from apply where id=?",id)
+	rows, err := db.Query("select * from apply where id=?", id)
 	defer rows.Close()
 
 	if !checkErr(err) {
@@ -418,14 +419,14 @@ func QueryUserApplyById(db *sql.DB, id int) (applyinfo ApplyInfo,err error){
 	}
 
 	for rows.Next() {
-		err := rows.Scan(&id_local,&applyinfo.Phonenum, &applyinfo.Account, &applyinfo.Status,
-			&applyinfo.Timestamp,&applyinfo.Duration,&applyinfo.Moneyamount,&applyinfo.Accounttype,
-			&applyinfo.Totalamount,&applyinfo.Totalinterest)
+		err := rows.Scan(&id_local, &applyinfo.Phonenum, &applyinfo.Account, &applyinfo.Status,
+			&applyinfo.Timestamp, &applyinfo.Duration, &applyinfo.Moneyamount, &applyinfo.Accounttype,
+			&applyinfo.Totalamount, &applyinfo.Totalinterest)
 		if !checkErr(err) {
 			return ApplyInfo{}, err
 		}
 	}
-	return 
+	return
 }
 
 func UpdateApplyStatus(db *sql.DB, id int, status int) (err error) {
@@ -438,7 +439,7 @@ func UpdateApplyStatus(db *sql.DB, id int, status int) (err error) {
 			return err
 		}
 	}
-	fmt.Printf("id=%d update apply status:%d\n", id,status)
+	fmt.Printf("id=%d update apply status:%d\n", id, status)
 	return nil
 }
 
@@ -452,22 +453,22 @@ func UpdateApplyTotalAmount(db *sql.DB, id int, totalamount float64, totalintere
 			return err
 		}
 	}
-	fmt.Printf("id=%d update apply total amount:%f interest:%f\n", id,totalamount,totalinterest)
+	fmt.Printf("id=%d update apply total amount:%f interest:%f\n", id, totalamount, totalinterest)
 	return nil
 }
-func QueryUserRecord(db *sql.DB, applyid, currentPage, perPage int) (recordInfo []RecordInfo,total int,err error){
+func QueryUserRecord(db *sql.DB, applyid, currentPage, perPage int) (recordInfo []RecordInfo, total int, err error) {
 	var (
 		temp RecordInfo
 	)
-	rows, err := db.Query("select * from record where apply_id=?",applyid)
+	rows, err := db.Query("select * from record where apply_id=?", applyid)
 	defer rows.Close()
 
 	if !checkErr(err) {
 		return []RecordInfo{}, 0, err
 	}
 	for rows.Next() {
-		err := rows.Scan(&temp.Applyid,&temp.Phonenum, &temp.Account, &temp.Applyid,
-			&temp.Timestamp,&temp.Price,&temp.Tokenamount,&temp.Interest)
+		err := rows.Scan(&temp.Applyid, &temp.Phonenum, &temp.Account, &temp.Applyid,
+			&temp.Timestamp, &temp.Price, &temp.Tokenamount, &temp.Interest)
 		if !checkErr(err) {
 			return []RecordInfo{}, 0, err
 		}
@@ -475,18 +476,18 @@ func QueryUserRecord(db *sql.DB, applyid, currentPage, perPage int) (recordInfo 
 	}
 	if currentPage == 0 {
 		total = len(recordInfo)
-		return 
+		return
 	}
 	fromIdx := (currentPage - 1) * perPage
 	total = len(recordInfo)
-	if len(recordInfo) > fromIdx + perPage {
-		recordInfo = recordInfo[fromIdx:fromIdx+perPage]
+	if len(recordInfo) > fromIdx+perPage {
+		recordInfo = recordInfo[fromIdx : fromIdx+perPage]
 	} else if len(recordInfo) > fromIdx {
 		recordInfo = recordInfo[fromIdx:]
-	}else{
+	} else {
 		recordInfo = []RecordInfo{}
 	}
-	return 
+	return
 }
 
 func QuereUserList(db *sql.DB) (rs []map[string]interface{}, err error) {
